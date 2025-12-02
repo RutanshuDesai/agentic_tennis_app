@@ -1,7 +1,39 @@
-This agentic AI helps me with scheduling my tennis matches. 
+### Tennis AI Agent — Personal Scheduling Assistant
 
-On a user prompt asking to play a match at a specific time and location, it will use the weather app to see if it is raining and also check my google calendar for availability. If it is possible to play it will add tennis match event on my calendar. 
-I can let it know the player name as well so that it can add that to the event name. 
+This project is an agentic AI assistant that helps me schedule my tennis matches and other fitness activities.
+The agent connects to my Google Calendar and a Weather API to determine whether I can play at a specified time and location.
 
-In the future, it will also be able to suggest other potential times that I can play if it is not possible at my prompted time. I can also use the process to add my gym events, and whether I did strength, stability exercise or endurance training to keep a track of all my activities. 
-I need to balance weight, stability, endurance and tennis activities. 
+### 🔧 What the agent does today
+
+Understands natural-language prompts like:
+“Can I play tennis tomorrow at 5 PM at Cary Tennis Park?”
+
+Checks:
+
+* 🌦 Weather conditions (rain, storms, temperature)
+
+* 📅 Calendar availability (busy, conflicts, travel)
+
+* If conditions are good, the agent:
+
+    - Creates a Tennis Match Event on my Google Calendar
+
+    - Includes optional opponent name in the event title
+
+* All agent reasoning + prompts + tool executions are tracked in LangSmith for full observability.
+
+### 🚀 Upcoming enhancements
+
+* Suggests alternative playable times when the requested time is not feasible
+
+* Tracks other fitness activities (gym, strength, endurance, stability)
+
+* Helps balance a weekly plan of:
+
+    - Tennis
+
+    - Strength training
+
+    - Stability work
+
+    - Endurance sessions

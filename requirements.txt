@@ -1,0 +1,7 @@
+openai==2.6.1
+langchain==1.1.0
+langchain-openai>=1.0.0
+python-dotenv
+env_utils
+langsmith
+streamlit

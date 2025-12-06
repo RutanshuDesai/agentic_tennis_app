@@ -1,6 +1,7 @@
 import streamlit as st
 from langchain_core.messages import HumanMessage, AIMessage
 from agent import get_agent
+#from langfuse.callback import CallbackHandler
 
 st.set_page_config(page_title="Agent Chat", page_icon="🤖")
 st.title("AI Agent Chat")
@@ -36,6 +37,10 @@ if prompt := st.chat_input("What can you help me with?"):
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 try:
+                    # Initialize Langfuse CallbackHandler
+                    # It will automatically pick up LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_HOST from env
+                    #langfuse_handler = CallbackHandler()
+
                     # Prepare messages for the agent
                     lc_messages = []
                     for msg in st.session_state.messages:
@@ -44,9 +49,12 @@ if prompt := st.chat_input("What can you help me with?"):
                         elif msg["role"] == "assistant":
                             lc_messages.append(AIMessage(content=msg["content"]))
                     
-                    # Invoke the agent
+                    # Invoke the agent with the callback handler
                     # The agent expects a dictionary with "messages"
-                    result = agent.invoke({"messages": lc_messages})
+                    result = agent.invoke(
+                        {"messages": lc_messages},
+                        #config={"callbacks": [langfuse_handler]}
+                    )
                     
                     # Extract the response
                     # Assuming result["messages"][-1] is the AI message as per notebook

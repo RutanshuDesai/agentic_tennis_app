@@ -21,5 +21,5 @@ ENV STREAMLIT_SERVER_HEADLESS=true
 ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
 
 # Run streamlit_app.py when the container launches
-CMD ["streamlit", "run", "streamlit_app.py"]
+CMD ["streamlit", "run", "tennis_agent_app/app.py"]
 

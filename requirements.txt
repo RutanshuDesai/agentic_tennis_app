@@ -12,3 +12,6 @@ langchain_community==0.4.1
 mlflow==3.6.0
 databricks-langchain==0.11.0
 langchain-ollama==1.0.0
+unstructured==0.18.21
+#pdfminer==20191125
+pdfminer.six<20221105

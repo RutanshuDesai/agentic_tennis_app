@@ -37,3 +37,13 @@ Checks:
     - Stability work
 
     - Endurance sessions
+
+
+### decisions made
+1. langchain v1 - for easier agent build
+2. chromadb - easier local vector db with production suppoort if need to expand
+3. unstructed - for processing pdf and docs
+4. llm - openai oss , openai top model with local run option. alternative - use dbrx hosted model since i have access to it. 
+5. streamlit - easy app build. easy debug and hosting
+6. container architecture - easy to shift and lift the application. cloud agnostic. can be hosted provate server like raspberry pi
+7. GCP cloud run - easier platform to get started. 

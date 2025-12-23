@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
+from langchain_ollama import OllamaEmbeddings
 
 # Load environment variables
 load_dotenv()
@@ -43,7 +44,6 @@ def create_vector_db():
     splits = text_splitter.split_documents(docs)
     print(f"Split into {len(splits)} chunks.")
 
-    from langchain_ollama import OllamaEmbeddings
     embedding_model = OllamaEmbeddings(model="nomic-embed-text:latest")
     
     # 5. Create and Persist Vector Store

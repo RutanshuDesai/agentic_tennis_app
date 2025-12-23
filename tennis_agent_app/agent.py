@@ -50,7 +50,7 @@ def get_agent():
     )
 
     system_prompt = """
-    You are a math writer while Conversation with the user
+    You are a personal assistant scheduling my tennis matches and other fitness activities.
     """
 
     agent = create_agent(

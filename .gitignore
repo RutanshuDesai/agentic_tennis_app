@@ -7,3 +7,4 @@ chroma_langchain_db
 .DS_Store
 *.ipynb
 vector_index_test
+README-legacy.md

@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
 from langchain_chroma import Chroma
-from langchain_ollama import OllamaEmbeddings
+from langchain_ollama import OllamaEmbeddings, ChatOllama
 from langchain.tools import tool
 
 # Load environment variables
@@ -32,25 +32,28 @@ def retrieve_context(query: str):
 
 
 
-def get_agent():
-    DATABRICKS_TOKEN = os.environ.get("DATABRICKS_TOKEN")
-    DATABRICKS_BASE_URL = os.environ.get("DATABRICKS_BASE_URL")
-    
-    if not DATABRICKS_TOKEN:
-        raise ValueError("DATABRICKS_TOKEN not found in environment variables.")
-    if not DATABRICKS_BASE_URL:
-        raise ValueError("DATABRICKS_BASE_URL not found in environment variables.")
+def get_agent(use_ollama: bool = True):
+    if use_ollama:
+        llm = ChatOllama(model="gpt-oss:latest")
+    else:
+        DATABRICKS_TOKEN = os.environ.get("DATABRICKS_TOKEN")
+        DATABRICKS_BASE_URL = os.environ.get("DATABRICKS_BASE_URL")
+        
+        if not DATABRICKS_TOKEN:
+            raise ValueError("DATABRICKS_TOKEN not found in environment variables.")
+        if not DATABRICKS_BASE_URL:
+            raise ValueError("DATABRICKS_BASE_URL not found in environment variables.")
 
-    # Create a LangChain chat model that talks to your Databricks serving endpoint
-    # Using the exact configuration from app.ipynb
-    llm = ChatOpenAI(
-        model="gemini-2-5-flash", 
-        api_key=DATABRICKS_TOKEN,
-        base_url=DATABRICKS_BASE_URL,
-    )
+        # Create a LangChain chat model that talks to your Databricks serving endpoint
+        # Using the exact configuration from app.ipynb
+        llm = ChatOpenAI(
+            model="gemini-2-5-flash", 
+            api_key=DATABRICKS_TOKEN,
+            base_url=DATABRICKS_BASE_URL,
+        )
 
     system_prompt = """
-    You are a personal assistant scheduling my tennis matches and other fitness activities.
+    You are a personal assistant scheduling my tennis matches and other fitness activities. You can share what LLM you are using to answer the questions.
     """
 
     agent = create_agent(

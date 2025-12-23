@@ -8,11 +8,11 @@ st.title("AI Agent Chat")
 
 # Setup Agent
 @st.cache_resource
-def get_cached_agent():
-    return get_agent()
+def get_cached_agent(use_ollama: bool):
+    return get_agent(use_ollama)
 
 try:
-    agent = get_cached_agent()
+    agent = get_cached_agent(use_ollama=True)
 except Exception as e:
     st.error(f"Error creating agent: {e}")
     agent = None

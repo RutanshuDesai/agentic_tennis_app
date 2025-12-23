@@ -16,17 +16,27 @@ Several production-grade agentic systems I’ve built professionally cannot be o
 
 ---
 
+## Embeddings & LLM Setup
+
+This project uses **Ollama** for local embeddings and LLM model to avoid reliance on paid APIs. The code does have a feature where you can use databricks hosted model if you have access. Hosted LLM can help lower runtime compute requirements. 
+
+---
+
 ## Problem
 
 Scheduling tennis matches—especially in ladder-style tournaments—is deceptively complex.
 
+The requirement of the Tennis ladder tournament is that you need to propose matches to players that they can accept, as well as you have the ability to accept the matches proposed by other players. Players with the most points at the end of the tournament qualify for knockout rounds. 
+
 To accept or propose a match, I need to:
-- Check calendar availability
+- Check my calendar availability
 - Verify playable weather conditions
 - Respect recovery constraints (e.g., no tennis after heavy workout days)
 - Propose multiple candidate time slots when needed
 
 As constraints increase, manual scheduling becomes inefficient and error-prone.
+
+More details on the problem statement available in the file - problem_statement.md
 
 ---
 
@@ -42,6 +52,7 @@ And autonomously:
 - Evaluates feasibility
 - Explains decisions
 - Suggests alternatives when constraints fail
+- Creates events on my calendar after human in the loop confirmation
 
 ---
 
@@ -153,13 +164,15 @@ The architecture is cloud-agnostic and designed to evolve with usage.
 
 ## Tech Stack
 
-- **LangChain v1** — agent framework
+- **LangChain v1** — quick open source agentic framework
 - **LangGraph** — planned for explicit state management
-- **ChromaDB** — local vector store for RAG
+- **ChromaDB** — local vector store for RAG. option to scale it if needed. 
 - **Unstructured** — document ingestion
-- **LLMs** — OpenAI / DBRX (configurable)
+- **LLMs** — Ollama [local] OR Databricks hosted [needs api to run]. 
+  - gpt-oss as Agent LLM due to open source high performance model
+  - nomic-embed-text for embeddings due to light weight and performances
 - **Streamlit** — lightweight UI
-- **Docker** — portable deployment
+- **Docker** — portable deployment, cloud agnostic, local deployment option
 - **FastMCP** — standardized tool interfaces
 
 ---
@@ -174,4 +187,9 @@ This project emphasizes:
 
 It is intentionally scoped as a **personal system** to experiment with agentic patterns applicable to larger, real-world applications.
 
+## Running the App
+
+The app currently runs locally using Streamlit and Ollama.
+
+See [RUN_LOCAL.md](./RUN_LOCAL.md) for detailed setup and execution steps.
 

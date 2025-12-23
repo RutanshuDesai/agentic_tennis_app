@@ -13,13 +13,19 @@ Make sure you have the following installed:
 - Git
 - Ollama: https://ollama.ai
 
+* If you would like to enable agentic response tracing and evaluation on LangSmith, add following this in the .env file
+
+    - LANGCHAIN_TRACING_V2=true
+    - LANGCHAIN_PROJECT=<PROJECT_NAME>
+    - LANGCHAIN_API_KEY=<LANGSMITH_API_KEY>
+
 ---
 
 ## 1. Clone the Repository
 
 ```bash
 git clone https://github.com/RutanshuDesai/agentic_tennis_app.git
-cd <repo-name>
+cd agentic_tennis_app
 
 python3.11 -m venv .venv
 source .venv/bin/activate  # macOS / Linux
@@ -29,7 +35,7 @@ pip install -r requirements.txt
 ollama pull nomic-embed-text
 ollama pull gpt-oss
 
-streamlit run app.py
+streamlit run tennis_agent_app/app.py
 ```
 
 Application available at: http://localhost:8501

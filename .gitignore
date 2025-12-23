@@ -3,8 +3,8 @@
 notebooks/
 *.pyc
 data
-chroma_langchain_db
 .DS_Store
 *.ipynb
-vector_index_test
 README-legacy.md
+tennis_agent_app/production_indexing.py
+tennis_agent_app/app_db/

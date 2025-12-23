@@ -4,7 +4,7 @@ from agent import get_agent
 #from langfuse.callback import CallbackHandler
 
 st.set_page_config(page_title="Agent Chat", page_icon="🤖")
-st.title("AI Agent Chat")
+st.title("Personal AI Agent Assistant Chat")
 
 # Setup Agent
 @st.cache_resource

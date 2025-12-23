@@ -40,6 +40,16 @@ streamlit run tennis_agent_app/app.py
 
 Application available at: http://localhost:8501
 
+
+## 2. Creating your own document vector index
+
+```bash
+Edit parameters and run "sample_build_index.py" to create your own index and use the vector index for the agent.
+```
+
+
+
+
 Ask sample questions like - 
 - What model are you running?
 - What can you help me with?

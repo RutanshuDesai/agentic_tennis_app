@@ -3,17 +3,18 @@ from langchain_ollama import OllamaEmbeddings
 import glob
 
 embeddings = OllamaEmbeddings(model="nomic-embed-text:latest")
-vector_store = c.instantiate_vector_db(collection_name="general_docs", persist_db_directory="app_db", embeddings_model=embeddings)
+
+vector_store = c.ChromaUtils(collection_name="test_docs3", persist_db_directory="app_db_test", embeddings_model=embeddings)
 
 ### READ DOCUMENTS
-for path in glob.glob("/data/*.pdf"): ## edit this to your own data folder
-    docs = c.read_documents(file_path=path)
-    chunks = c.split_documents(documents=docs)
-    vector_store = c.add_chunked_documents_to_vector_db(vector_store=vector_store, chunks=chunks)
+for path in glob.glob("data/*.pdf"): ## edit this to your own data folder
+    docs = vector_store.read_documents(file_path=path)
+    chunks = vector_store.split_documents(documents=docs)
+    vector_store.add_chunked_documents(chunks=chunks)
 
-'''### EXPLORE VECTOR DATABASE
-collections = c.list_collections(persist_db_directory="test_db")
+### EXPLORE VECTOR DATABASE
+collections = vector_store.list_collections()
 print(collections)
 
-data_df = c.view_vector_database_items_as_pandas_dataframe(db_path="test_db", collection_name="test_collection")
-data_df'''
+data_df = vector_store.view_vector_items()
+print(data_df)

@@ -53,3 +53,5 @@ Edit parameters and run "sample_build_index.py" to create your own index and use
 Ask sample questions like - 
 - What model are you running?
 - What can you help me with?
+- what is the weather in fuquay at 2pm
+- how is the weather in fuquay at 8am on jan 1 2026

@@ -6,7 +6,7 @@ from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings, ChatOllama
 from langchain.tools import tool
 import chroma_utils as c
-
+import weather as w
 # Load environment variables
 load_dotenv()
 
@@ -15,7 +15,7 @@ embeddings = OllamaEmbeddings(model="nomic-embed-text:latest")
 # Initialize Chroma
 vector_store = c.instantiate_vector_db(collection_name="general_docs", persist_db_directory="app_db", embeddings_model=embeddings)
 
-@tool(response_format="content_and_artifact")
+@tool(response_format="content_and_artifact", description="tool to retrieve information from personal documents.")
 def retrieve_context(query: str):
     """Retrieve information to help answer a query."""
     retrieved_docs = vector_store.similarity_search(query, k=3)
@@ -25,8 +25,14 @@ def retrieve_context(query: str):
     )
     return serialized, retrieved_docs
 
-
-
+@tool(response_format="content", description="Get weather information for a specific city and hour.")
+def get_weather(city: str, date: str, hour: int):
+    """Get weather information for a specific city and hour."""
+    
+    weather_client = w.WorldWeatherClient(api_key=os.environ.get("WEATHER_API_KEY"), base_url=w.DEFAULT_BASE_URL, timeout=10)
+    weather_service = w.TennisWeatherService(weather_client)
+    weather = weather_service.get_hourly_play_conditions(city, hour, date)
+    return weather
 
 def get_agent(use_ollama: bool = True):
     if use_ollama:
@@ -49,14 +55,15 @@ def get_agent(use_ollama: bool = True):
         )
 
     system_prompt = """
-    You are a personal assistant scheduling my tennis matches and other fitness activities. You can share what LLM you are using to answer the questions. 
+    You are a personal assistant scheduling my tennis matches and other fitness activities. If specifically asked what model you running, then only share it.
     You also have access to a vector database of your personal documents.
     You can use the vector database to answer questions about your personal documents.
+    You can use the weather tool to get weather information for a specific city and hour, and ultimately check if you can play tennis at that time.
     """
 
     agent = create_agent(
         model=llm,
-        tools=[retrieve_context], # Add tools if defined
+        tools=[retrieve_context, get_weather], # Add tools if defined
         system_prompt=system_prompt,
     )
     return agent

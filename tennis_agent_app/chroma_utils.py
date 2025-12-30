@@ -1,5 +1,3 @@
-import os
-import glob
 from dotenv import load_dotenv
 import pandas as pd
 
@@ -7,14 +5,12 @@ import chromadb
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-from langchain_ollama import OllamaEmbeddings
 
 # Load environment variables
 load_dotenv()
-#embeddings = OllamaEmbeddings(model="nomic-embed-text:latest")
 
 class ChromaUtils:
-    def __init__(self, collection_name: str, persist_db_directory: str, embeddings_model: str) -> Chroma:
+    def __init__(self, collection_name: str, persist_db_directory: str, embeddings_model: Embeddings):
         '''
         Instantiate a vector database. Loads existing vector database from persist_db_directory if it exists else creates a new vector database.
         Args:
@@ -28,17 +24,21 @@ class ChromaUtils:
         self.collection_name=collection_name
         self.persist_db_directory=persist_db_directory
         self.embeddings_model=embeddings_model
+        self.client = chromadb.PersistentClient(path=self.persist_db_directory)
 
-        ### CREATE OR READ VECTOR DATABASE
-        self.vector_store = Chroma(
+    def create_vector_collection(self):   
+        self.vector_collection = Chroma(
             collection_name=self.collection_name,
             embedding_function=self.embeddings_model,
             persist_directory=self.persist_db_directory
         )
 
+        return self.vector_collection
+
 
     ### READ DOCUMENTS
-    def read_documents(self, file_path: str):    
+    @staticmethod
+    def read_documents(file_path: str):    
         '''
         Read documents from a file. Supported file types: PDF
         Args:
@@ -50,7 +50,8 @@ class ChromaUtils:
         return loader.load()
 
     ### SPLIT/CHUNK DOCUMENTS
-    def split_documents(self, documents: list):
+    @staticmethod
+    def split_documents(documents: list):
         '''
         Split documents into chunks
         Args:
@@ -76,7 +77,10 @@ class ChromaUtils:
         Returns:
             vector_store: vector database
         '''
-        self.vector_store.add_documents(chunks)
+        if not hasattr(self, 'vector_store'):
+            vector_store = self.create_vector_collection()
+        vector_store.add_documents(chunks)
+        return vector_store
 
 
 
@@ -89,8 +93,7 @@ class ChromaUtils:
         Returns:
             collections: list of collections
         '''
-        client = chromadb.PersistentClient(path=self.persist_db_directory)
-        return client.list_collections()
+        return self.client.list_collections()
 
     ### VIEW VECTOR DATABASE ITEMS AS A PANDAS DATAFRAME    
     def view_vector_items(self):
@@ -101,8 +104,7 @@ class ChromaUtils:
         Returns:
             dataframe: pandas dataframe
         '''
-        client = chromadb.PersistentClient(path=self.persist_db_directory)
-        collection = client.get_collection(self.collection_name)
+        collection = self.client.get_collection(self.collection_name)
 
 
         data = collection.peek()  # usually returns e.g., {"ids": [...], "documents": [...], "metadatas": [...]}

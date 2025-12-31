@@ -31,7 +31,6 @@ class ChromaUtils:
         self.collection_name=collection_name
         self.persist_db_directory=persist_db_directory
         self.embeddings_model=embeddings_model
-        self.client = chromadb.PersistentClient(path=self.persist_db_directory)
 
     def create_vector_collection(self):   
         
@@ -109,10 +108,12 @@ class ChromaUtils:
         Returns:
             collections: list of collections
         '''
-        return self.client.list_collections()
+        client = chromadb.PersistentClient(path=self.persist_db_directory)
+        return client.list_collections()
+
 
     ### VIEW VECTOR DATABASE ITEMS AS A PANDAS DATAFRAME    
-    def view_vector_items(self):
+    def view_vector_items(self, limit: int = 25):
         '''
         View vector database items as a pandas dataframe
         Args:
@@ -120,14 +121,21 @@ class ChromaUtils:
         Returns:
             dataframe: pandas dataframe
         '''
-        collection = self.client.get_collection(self.collection_name)
+
+        ## getting raw data from vector database
+        v = self.create_vector_collection()
+        data = v.get(limit=limit)
+
+        ## converting raw data to pandas dataframe
+        pandas_data=pd.DataFrame(data['ids'])
+        pandas_data['documents']=data['documents']
+        pandas_data['metadatas']=data['metadatas']
+
+        ## extracting file name from metadata
+        def extract_file_name(doc_metadata):
+            return doc_metadata['source'].split('/')[-1]
+
+        pandas_data['source'] = pandas_data['metadatas'].apply(extract_file_name)
 
 
-        data = collection.peek()  # usually returns e.g., {"ids": [...], "documents": [...], "metadatas": [...]}
-        data_df = pd.DataFrame({
-            "id": data["ids"],
-            "document": data["documents"],
-            "metadata": data["metadatas"]
-        })
-
-        return data_df
+        return pandas_data

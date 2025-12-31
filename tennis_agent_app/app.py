@@ -3,6 +3,22 @@ from langchain_core.messages import HumanMessage, AIMessage
 from agent import get_agent
 #from langfuse.callback import CallbackHandler
 
+
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
+logger.info("Starting Tennis agentic application")
+
+
 st.set_page_config(page_title="Agent Chat", page_icon="🤖")
 st.title("Personal AI Agent Assistant Chat")
 

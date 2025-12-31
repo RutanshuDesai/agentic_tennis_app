@@ -8,3 +8,4 @@ data
 README-legacy.md
 tennis_agent_app/production_indexing.py
 tennis_agent_app/app_db/
+*.log

@@ -6,11 +6,15 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 # Load environment variables
 load_dotenv()
 
 class ChromaUtils:
-    def __init__(self, collection_name: str, persist_db_directory: str, embeddings_model: Embeddings):
+    def __init__(self, collection_name: str, persist_db_directory: str, embeddings_model: str):
         '''
         Instantiate a vector database. Loads existing vector database from persist_db_directory if it exists else creates a new vector database.
         Args:
@@ -21,20 +25,28 @@ class ChromaUtils:
             vector_store: instantiated vector database
         '''
 
+        logger.info("Initializing ChromaUtils", extra={"collection_name": collection_name, "persist_dir": persist_db_directory})
+
+
         self.collection_name=collection_name
         self.persist_db_directory=persist_db_directory
         self.embeddings_model=embeddings_model
         self.client = chromadb.PersistentClient(path=self.persist_db_directory)
 
     def create_vector_collection(self):   
-        self.vector_collection = Chroma(
-            collection_name=self.collection_name,
-            embedding_function=self.embeddings_model,
-            persist_directory=self.persist_db_directory
-        )
+        
+        try:
+            self.vector_collection = Chroma(
+                collection_name=self.collection_name,
+                embedding_function=self.embeddings_model,
+                persist_directory=self.persist_db_directory
+            )
 
-        return self.vector_collection
-
+            logger.info("Chroma vector store initialized successfully")
+            return self.vector_collection
+        except Exception:
+            logger.exception("Failed to initialize chroma vector db")
+            raise
 
     ### READ DOCUMENTS
     @staticmethod
@@ -47,6 +59,8 @@ class ChromaUtils:
             documents: list of documents
         '''
         loader = PyPDFLoader(file_path, mode="single")
+        logger.info("Documents read successfully")
+
         return loader.load()
 
     ### SPLIT/CHUNK DOCUMENTS
@@ -63,6 +77,7 @@ class ChromaUtils:
             chunk_size=1000,
             chunk_overlap=200
         )
+        logger.info("Documents chunked successfully")
         return text_splitter.split_documents(documents)
 
 
@@ -80,6 +95,7 @@ class ChromaUtils:
         if not hasattr(self, 'vector_store'):
             vector_store = self.create_vector_collection()
         vector_store.add_documents(chunks)
+        logger.info("Chunks added to vector db successfully")
         return vector_store
 
 

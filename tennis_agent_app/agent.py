@@ -5,15 +5,22 @@ from langchain.agents import create_agent
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings, ChatOllama
 from langchain.tools import tool
-import chroma_utils as c
+from chroma_utils import ChromaUtils
 import weather as w
+import logging
+logger = logging.getLogger(__name__)
+
+
 # Load environment variables
 load_dotenv()
 
 ## setting up vector store
 embeddings = OllamaEmbeddings(model="nomic-embed-text:latest")
+
 # Initialize Chroma
-vector_store = c.instantiate_vector_db(collection_name="general_docs", persist_db_directory="app_db", embeddings_model=embeddings)
+
+c = ChromaUtils(collection_name="general_docs", persist_db_directory="app_db", embeddings_model=embeddings)
+vector_store = c.create_vector_collection()
 
 @tool(response_format="content_and_artifact", description="tool to retrieve information from personal documents.")
 def retrieve_context(query: str):
@@ -23,6 +30,7 @@ def retrieve_context(query: str):
         (f"Source: {doc.metadata}\nContent: {doc.page_content}")
         for doc in retrieved_docs
     )
+    logger.info("Doc retreiver used!")
     return serialized, retrieved_docs
 
 @tool(response_format="content", description="Get weather information for a specific city and hour.")
@@ -32,11 +40,13 @@ def get_weather(city: str, date: str, hour: int):
     weather_client = w.WorldWeatherClient(api_key=os.environ.get("WEATHER_API_KEY"), base_url=w.DEFAULT_BASE_URL, timeout=10)
     weather_service = w.TennisWeatherService(weather_client)
     weather = weather_service.get_hourly_play_conditions(city, hour, date)
+    logger.info("Weather tool used!")
     return weather
 
 def get_agent(use_ollama: bool = True):
     if use_ollama:
         llm = ChatOllama(model="gpt-oss:latest")
+        logger.info("Using local Ollama LLM model!")
     else:
         DATABRICKS_TOKEN = os.environ.get("DATABRICKS_TOKEN")
         DATABRICKS_BASE_URL = os.environ.get("DATABRICKS_BASE_URL")
@@ -53,6 +63,7 @@ def get_agent(use_ollama: bool = True):
             api_key=DATABRICKS_TOKEN,
             base_url=DATABRICKS_BASE_URL,
         )
+        logger.info("Using external hosted LLM model!")
 
     system_prompt = """
     You are a personal assistant scheduling my tennis matches and other fitness activities. If specifically asked what model you running, then only share it.

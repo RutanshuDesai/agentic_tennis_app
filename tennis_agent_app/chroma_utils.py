@@ -127,7 +127,7 @@ class ChromaUtils:
         data = v.get(limit=limit)
 
         ## converting raw data to pandas dataframe
-        pandas_data=pd.DataFrame(data['ids'])
+        pandas_data = pd.DataFrame({"id": data["ids"]})
         pandas_data['documents']=data['documents']
         pandas_data['metadatas']=data['metadatas']
 

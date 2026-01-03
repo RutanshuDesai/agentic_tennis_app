@@ -170,7 +170,7 @@ The architecture is cloud-agnostic and designed to evolve with usage.
 - **Unstructured** — document ingestion
 - **LLMs** — Ollama [local] OR Databricks hosted [needs api to run]. 
   - gpt-oss as Agent LLM due to open source high performance model
-  - nomic-embed-text for embeddings due to light weight and performances
+  - nomic-embed-text for embeddings due to lightweight and good performance
 - **Streamlit** — lightweight UI
 - **Docker** — portable deployment, cloud agnostic, local deployment option
 - **FastMCP** — standardized tool interfaces

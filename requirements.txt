@@ -15,3 +15,7 @@ langchain-ollama==1.0.0
 unstructured==0.18.21
 #pdfminer==20191125
 pdfminer.six<20221105
+pytest==8.3.4
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib

@@ -55,3 +55,5 @@ Ask sample questions like -
 - What can you help me with?
 - what is the weather in fuquay at 2pm
 - how is the weather in fuquay at 8am on jan 1 2026
+- how is the weather in hollyspring on sunday jan 4th at 10am? also can you tell me the weather starting saturday 7pm to sunday 12pm in a table format? make sure the table has the correct dates and data.
+- schedule a tennis match at 10am on Jan 5th 2026 at cary

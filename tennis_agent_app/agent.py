@@ -6,8 +6,9 @@ from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings, ChatOllama
 from langchain.tools import tool
 from chroma_utils import ChromaUtils
-import weather as w
 import logging
+from tools import google_calendar
+from tools import weather as w
 logger = logging.getLogger(__name__)
 
 
@@ -19,7 +20,7 @@ embeddings = OllamaEmbeddings(model="nomic-embed-text:latest")
 
 # Initialize Chroma
 
-c = ChromaUtils(collection_name="general_docs", persist_db_directory="app_db", embeddings_model=embeddings)
+c = ChromaUtils(collection_name="general_docs", persist_db_directory=os.environ.get("VECTOR_INDEX_DB_PATH"), embeddings_model=embeddings)
 vector_store = c.create_vector_collection()
 
 @tool(response_format="content_and_artifact", description="tool to retrieve information from personal documents.")
@@ -39,9 +40,24 @@ def get_weather(city: str, date: str, hour: int):
     
     weather_client = w.WorldWeatherClient(api_key=os.environ.get("WEATHER_API_KEY"), base_url=w.DEFAULT_BASE_URL, timeout=10)
     weather_service = w.TennisWeatherService(weather_client)
-    weather = weather_service.get_hourly_play_conditions(city, hour, date)
+    weather_data = weather_service.get_hourly_play_conditions(city, hour, date)
     logger.info("Weather tool used!")
-    return weather
+    return weather_data
+
+@tool(response_format="content", description="Create a calendar event.")
+def create_calendar_event(summary: str, start_time: str, end_time: str, description: str = ""):
+    '''
+    Create a calendar event.
+    Args:
+        summary: summary of the event
+        start_time: start time of the event
+        end_time: end time of the event
+        description: description of the event
+    '''
+    """Create a calendar event."""
+    google_calendar.create_calendar_event(summary, start_time, end_time, description)
+    logger.info("Calendar tool used!")
+    return "Calendar event created successfully!"
 
 def get_agent(use_ollama: bool = True):
     if use_ollama:
@@ -70,11 +86,12 @@ def get_agent(use_ollama: bool = True):
     You also have access to a vector database of your personal documents.
     You can use the vector database to answer questions about your personal documents.
     You can use the weather tool to get weather information for a specific city and hour, and ultimately check if you can play tennis at that time.
+    You can use the calendar tool to create a calendar event.
     """
 
     agent = create_agent(
         model=llm,
-        tools=[retrieve_context, get_weather], # Add tools if defined
+        tools=[retrieve_context, get_weather, create_calendar_event], # Add tools if defined
         system_prompt=system_prompt,
     )
     return agent

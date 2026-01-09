@@ -166,6 +166,7 @@ The architecture is cloud-agnostic and designed to evolve with usage.
 
 - **LangChain v1** — quick open source agentic framework
 - **LangGraph** — planned for explicit state management
+- **LangSmith/Langfuse** — quick start with langsmith for observability and response tracing, but plan to move to open-source langfuse
 - **ChromaDB** — local vector store for RAG. option to scale it if needed. 
 - **Unstructured** — document ingestion
 - **LLMs** — Ollama [local] OR Databricks hosted [needs api to run]. 

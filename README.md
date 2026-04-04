@@ -2,7 +2,7 @@
 
 An **agentic AI scheduling assistant** that helps coordinate tennis matches and fitness activities by reasoning over availability, weather, and recovery constraints.
 
-This project focuses on **agent orchestration, tool design, and observability**, rather than novel ML algorithms.
+This project focuses on **agent orchestration, tool design, and observability**.
 
 ---
 
@@ -36,7 +36,7 @@ To accept or propose a match, I need to:
 
 As constraints increase, manual scheduling becomes inefficient and error-prone.
 
-More details on the problem statement available in the file - problem_statement.md
+More details on the problem statement available in the file - [problem_statement.md](./problem_statement.md)
 
 ---
 

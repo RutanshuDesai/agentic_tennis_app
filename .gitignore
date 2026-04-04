@@ -11,3 +11,4 @@ tennis_agent_app/app_db/
 *.log
 key_learning.txt
 google_secret/
+tennis_agent_app/*.txt

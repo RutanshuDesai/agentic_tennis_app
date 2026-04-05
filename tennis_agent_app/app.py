@@ -37,50 +37,47 @@ except Exception as e:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display chat messages from history on app rerun
+# Display chat from session only (single source of truth — avoids duplicate + grey "stale" bubbles)
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# React to user input
+# Persist new user input, then rerun (do not also render user via a second chat_message in this run)
 if prompt := st.chat_input("What can you help me with?"):
-    # Display user message in chat message container
-    st.chat_message("user").markdown(prompt)
-    # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
+    st.rerun()
 
+# When the last message is from the user, generate the assistant reply on the next run
+if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
     if agent:
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 try:
-                    # Initialize Langfuse CallbackHandler
-                    # It will automatically pick up LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_HOST from env
-                    #langfuse_handler = CallbackHandler()
-
-                    # Prepare messages for the agent
                     lc_messages = []
                     for msg in st.session_state.messages:
                         if msg["role"] == "user":
                             lc_messages.append(HumanMessage(content=msg["content"]))
                         elif msg["role"] == "assistant":
                             lc_messages.append(AIMessage(content=msg["content"]))
-                    
-                    # Invoke the agent with the callback handler
-                    # The agent expects a dictionary with "messages"
+
                     result = agent.invoke(
                         {"messages": lc_messages},
-                        #config={"callbacks": [langfuse_handler]}
                     )
-                    
-                    # Extract the response
-                    # Assuming result["messages"][-1] is the AI message as per notebook
                     response_content = result["messages"][-1].content
-                    
                     st.markdown(response_content)
-                    
-                    # Add assistant response to chat history
-                    st.session_state.messages.append({"role": "assistant", "content": response_content})
+                    st.session_state.messages.append(
+                        {"role": "assistant", "content": response_content}
+                    )
+                    st.rerun()
                 except Exception as e:
-                    st.error(f"An error occurred: {e}")
+                    err = f"An error occurred: {e}"
+                    st.error(err)
+                    st.session_state.messages.append({"role": "assistant", "content": err})
+                    st.rerun()
     else:
-        st.error("Agent is not initialized.")
+        with st.chat_message("assistant"):
+            st.error("Agent is not initialized.")
+        st.session_state.messages.append(
+            {"role": "assistant", "content": "Agent is not initialized."}
+        )
+        st.rerun()

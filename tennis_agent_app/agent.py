@@ -61,6 +61,21 @@ def create_calendar_event(summary: str, start_time: str, end_time: str, descript
     logger.info("Calendar tool used!")
     return "Calendar event created successfully!"
 
+@tool(response_format="content", description="List Google Calendar events on the primary calendar for a date range.")
+def list_calendar_events(start_date: str = "", end_date: str = ""):
+    """
+    View calendar events in a time window.
+
+    Args:
+        start_date: Optional. Start of range as YYYY-MM-DD or RFC3339. Empty = start of today (America/New_York).
+        end_date: Optional. End of range as YYYY-MM-DD (inclusive) or RFC3339. Empty = 30 days after start.
+    """
+    start = start_date.strip() or None
+    end = end_date.strip() or None
+    text = google_calendar.list_calendar_events(time_min_iso=start, time_max_iso=end)
+    logger.info("Calendar list tool used!")
+    return text
+
 def get_agent(use_ollama: bool = True):
     if use_ollama:
         llm = ChatOllama(model="gemma4:26b")
@@ -92,7 +107,7 @@ def get_agent(use_ollama: bool = True):
         ### CAPABILITIES & TOOLS
         1.  **Vector DB (Retrieval):** Access personal documents to answer specific user questions or find player preferences.
         2.  **Weather Tool:** Retrieve hourly forecasts (Wind, Rain, Temp).
-        3.  **Calendar Tool:** Create/modify events once a time is confirmed.
+        3.  **Calendar Tools:** Used to analyze events on my calendar as well as create new events. Use this tool when asked to list or fetch or view my upcoming events, as well as for analysis if I can play tennis match. 
 
         ### TENNIS PLAYABILITY CONSTRAINTS
         A session is ONLY "Playable" if ALL these conditions are met:
@@ -115,7 +130,7 @@ def get_agent(use_ollama: bool = True):
 
     agent = create_agent(
         model=llm,
-        tools=[retrieve_context, get_weather, create_calendar_event], # Add tools if defined
+        tools=[retrieve_context, get_weather, create_calendar_event, list_calendar_events],
         system_prompt=system_prompt,
     )
     return agent

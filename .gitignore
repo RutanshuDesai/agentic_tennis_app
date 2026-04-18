@@ -12,3 +12,4 @@ tennis_agent_app/app_db/
 key_learning.txt
 google_secret/
 tennis_agent_app/*.txt
+tennis_agent_app/vertex_api.py

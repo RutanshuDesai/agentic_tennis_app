@@ -18,7 +18,13 @@ Several production-grade agentic systems I’ve built professionally cannot be o
 
 ## Embeddings & LLM Setup
 
-This project uses **Ollama** for local embeddings and LLM model to avoid reliance on paid APIs. The code does have a feature where you can use databricks hosted model if you have access. Hosted LLM can help lower runtime compute requirements. 
+This project supports three LLM backends, giving you the flexibility to run locally or in the cloud:
+
+- **Ollama** — Run fully local with no paid APIs (default).
+- **GCP Vertex AI** — Use Google's hosted Gemini models via a Vertex API key.
+- **Databricks** — Use a Databricks-hosted model if you have access to a Databricks workspace.
+
+Select the backend by setting the `MODEL` option when launching the app. Hosted backends can help lower local compute requirements.
 
 ---
 
@@ -60,19 +66,22 @@ And autonomously:
 
 The system is built using **LangChain v1**, with a deliberate focus on **clarity, extensibility, and observability**.
 
-### High-level reasoning flow
-1. Intent parsing
-2. Constraint evaluation:
-   - Calendar availability
-   - Weather conditions
-   - Workout and recovery rules
-3. Decision:
-   - Accept proposed time  
-   - OR suggest alternative slots
-4. Human-in-the-loop confirmation
-5. Action execution (calendar event creation)
+### Operational Workflow
+When asked "Can I play tennis on [Date] at [Time] in [Location]?":
 
-Each step is explicit, inspectable, and debuggable.
+1. **Phase 0 — Calendar & History Check**
+   - List all calendar events for the requested date and check for conflicts (including a 4-hour post-match buffer).
+   - Check the previous day's events — if any contain "workout", "gym", "tennis", or "exercise", the user is too fatigued to play.
+2. **Phase 1 — Weather Validation**
+   - Fetch hourly forecasts for the requested time and the surrounding buffer window (6 hours before, 4 hours after).
+3. **Phase 2 — Reasoning**
+   - Compare weather data against playability constraints.
+4. **Phase 3 — Verdict**
+   - Provide a clear "Playable" or "Not Playable" decision with supporting data.
+5. **Phase 4 — Alternative Scan**
+   - Offer to scan the rest of the day or weekend for a better window if the requested slot fails.
+
+Each phase is explicit, inspectable, and debuggable.
 
 ---
 
@@ -97,14 +106,15 @@ This progression reflects an intentional, stage-appropriate design choice.
 
 ## Tools Used by the Agent
 
-- 📅 **Google Calendar Tool**  
-  Checks conflicts, availability, and scheduling constraints
+- 📅 **Google Calendar Tools**  
+  - *List Events* — fetches events for a date range to check conflicts, availability, and prior-day workout history  
+  - *Create Event* — books a calendar event after human-in-the-loop confirmation
 
 - 🌦 **Weather Tool**  
   Enforces minimum playable conditions:
-  - Temperature: 35°F – 85°F  
+  - Temperature: > 40°F and < 90°F  
   - Wind: < 10 mph  
-  - No rain or storms
+  - Precipitation: 0% rain during the match, 6 hours before, and 4 hours after
 
 - 📄 **Document Retrieval (RAG)**  
   Used for personal scheduling rules and reference documents
@@ -128,12 +138,13 @@ Agent-based orchestration enables:
 
 ## Observability
 
-All agent reasoning, prompts, and tool executions are tracked using **LangSmith**.
+All agent reasoning, prompts, and tool executions are tracked using **Langfuse** (open-source, self-hostable), with **LangSmith** available as a backup.
 
 This enables:
 - Full trace inspection
 - Debugging incorrect decisions
 - Understanding why alternatives were suggested
+- Self-hosted observability with no vendor lock-in
 
 Observability is treated as a **first-class concern**, not an afterthought.
 
@@ -166,15 +177,15 @@ The architecture is cloud-agnostic and designed to evolve with usage.
 
 - **LangChain v1** — quick open source agentic framework
 - **LangGraph** — planned for explicit state management
-- **LangSmith/Langfuse** — quick start with langsmith for observability and response tracing, but plan to move to open-source langfuse
+- **Langfuse** — primary observability and response tracing (open-source, self-hostable)
+- **LangSmith** — backup observability option (set `LANGCHAIN_TRACING_V2=true` to enable)
 - **ChromaDB** — local vector store for RAG. option to scale it if needed. 
 - **Unstructured** — document ingestion
-- **LLMs** — Ollama [local] OR Databricks hosted [needs api to run]. 
-  - gpt-oss as Agent LLM due to open source high performance model
-  - nomic-embed-text for embeddings due to lightweight and good performance
+- **LLMs** — Three backend options: Ollama (local), GCP Vertex AI, or Databricks
+  - Embeddings via Ollama (`nomic-embed-text`)
 - **Streamlit** — lightweight UI
 - **Docker** — portable deployment, cloud agnostic, local deployment option
-- **FastMCP** — standardized tool interfaces
+- **FastMCP** — standardized tool interfaces (planned)
 
 ---
 
@@ -190,7 +201,7 @@ It is intentionally scoped as a **personal system** to experiment with agentic p
 
 ## Running the App
 
-The app currently runs locally using Streamlit and Ollama.
+The app runs locally using Streamlit. The LLM backend is configurable — set it to `ollama`, `vertex`, or `databricks` in `app.py`.
 
 See [RUN_LOCAL.md](./RUN_LOCAL.md) for detailed setup and execution steps.
 

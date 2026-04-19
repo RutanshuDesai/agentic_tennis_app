@@ -81,7 +81,14 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
                     result = agent.invoke(
                         {"messages": lc_messages},
                     )
-                    response_content = result["messages"][-1].content
+                    raw = result["messages"][-1].content
+                    if isinstance(raw, list):
+                        response_content = "\n\n".join(
+                            block.get("text", "") if isinstance(block, dict) else str(block)
+                            for block in raw
+                        ).strip()
+                    else:
+                        response_content = str(raw)
 
                     elapsed = time.time() - start_time
                     logger.info("[Q#%d] Agent response received (%.2fs)", q_num, elapsed)

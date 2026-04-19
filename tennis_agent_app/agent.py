@@ -112,8 +112,9 @@ def get_agent(model: str = "ollama"):
             raise ValueError("VERTEX_API_KEY not found in environment variables.")
 
         llm = ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash",
+            model="gemini-3.1-flash-lite-preview", # gemini-2.5-flash; gemini-3.1-flash-lite-preview ; gemini-3-flash-preview
             google_api_key=VERTEX_API_KEY,
+            vertexai=True,
         )
         logger.info("Using Google Vertex AI LLM model!")
 
@@ -128,8 +129,8 @@ def get_agent(model: str = "ollama"):
 
         ### CAPABILITIES & TOOLS
         1.  **Vector DB (Retrieval):** Access personal documents to answer specific user questions or find player preferences.
-        2.  **Weather Tool:** Retrieve hourly forecasts (Wind, Rain, Temp).
-        3.  **Calendar Tools:** Used to analyze events on my calendar as well as create new events. Use this tool when asked to list or fetch or view my upcoming events, as well as for analysis if I can play tennis match. 
+        2.  **Weather Tool:** Retrieve hourly forecasts (Wind, Rain, Temp). When searching for the weather, always refer to ET timezone. 
+        3.  **Calendar Tools:** Used to analyze events on my calendar as well as create new events. Use this tool when asked to list or fetch or view my upcoming events, as well as for analysis if I can play tennis match. When creating new events, always put on ET timezone. 
 
         ### TENNIS PLAYABILITY CONSTRAINTS
         A session is ONLY "Playable" if ALL these conditions are met:

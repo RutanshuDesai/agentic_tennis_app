@@ -15,6 +15,12 @@ logger = logging.getLogger(__name__)
 
 CREDS_FILE = os.environ.get("GOOGLE_CALENDAR_CRED_FILE_PATH")
 TOKEN_FILE = os.environ.get("GOOGLE_CALENDAR_TOKEN_FILE_PATH")
+CALENDAR_ID = os.environ.get("GOOGLE_CALENDAR_ID", "primary")
+CALENDAR_IDS_TO_CHECK = [
+    cid.strip()
+    for cid in os.environ.get("GOOGLE_CALENDAR_IDS_TO_CHECK", "primary").split(",")
+    if cid.strip()
+]
 
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
@@ -62,7 +68,7 @@ def create_calendar_event(summary, start_time, end_time, description=""):
         'end': {'dateTime': end_time, 'timeZone': 'America/New_York'},
     }
 
-    event = service.events().insert(calendarId='primary', body=event_body).execute()
+    event = service.events().insert(calendarId=CALENDAR_ID, body=event_body).execute()
     print(f"Event created: {event.get('htmlLink')}")
 
 
@@ -88,7 +94,7 @@ def _parse_range_bound(value: Optional[str], *, end_of_day: bool) -> Optional[da
         ) from None
 
 
-def _event_line(item: dict) -> str:
+def _event_line(item: dict, calendar_id: str = "") -> str:
     summary = item.get("summary") or "(No title)"
     start = item.get("start") or {}
     end = item.get("end") or {}
@@ -96,6 +102,8 @@ def _event_line(item: dict) -> str:
     end_s = end.get("dateTime") or end.get("date", "")
     loc = item.get("location") or ""
     parts = [f"- {summary}", f"  start: {start_s}", f"  end: {end_s}"]
+    if calendar_id:
+        parts.append(f"  calendar: {calendar_id}")
     if loc:
         parts.append(f"  location: {loc}")
     return "\n".join(parts)
@@ -107,8 +115,8 @@ def list_calendar_events(
     max_results_per_page: int = 250,
 ) -> str:
     """
-    List events on the primary calendar between time_min and time_max (inclusive window).
-    Paginates until all events in the range are retrieved.
+    List events across all calendars in CALENDAR_IDS_TO_CHECK between time_min
+    and time_max (inclusive window). Results are merged and sorted by start time.
     If bounds are omitted, uses start of today through 30 days ahead (America/New_York).
     """
     creds = _get_credentials()
@@ -125,36 +133,43 @@ def list_calendar_events(
     time_min_s = time_min.isoformat()
     time_max_s = time_max.isoformat()
 
-    items: List[dict] = []
-    page_token: Optional[str] = None
-    while True:
-        req = (
-            service.events()
-            .list(
-                calendarId="primary",
-                timeMin=time_min_s,
-                timeMax=time_max_s,
-                maxResults=max_results_per_page,
-                singleEvents=True,
-                orderBy="startTime",
-                pageToken=page_token,
+    all_items: List[tuple] = []
+    for cal_id in CALENDAR_IDS_TO_CHECK:
+        page_token: Optional[str] = None
+        while True:
+            req = (
+                service.events()
+                .list(
+                    calendarId=cal_id,
+                    timeMin=time_min_s,
+                    timeMax=time_max_s,
+                    maxResults=max_results_per_page,
+                    singleEvents=True,
+                    orderBy="startTime",
+                    pageToken=page_token,
+                )
+                .execute()
             )
-            .execute()
-        )
-        items.extend(req.get("items") or [])
-        page_token = req.get("nextPageToken")
-        if not page_token:
-            break
+            for item in req.get("items") or []:
+                all_items.append((item, cal_id))
+            page_token = req.get("nextPageToken")
+            if not page_token:
+                break
 
-    if not items:
+    all_items.sort(
+        key=lambda pair: pair[0].get("start", {}).get("dateTime")
+        or pair[0].get("start", {}).get("date", "")
+    )
+
+    if not all_items:
         return (
             f"No events between {time_min_s} and {time_max_s} "
             f"(America/New_York calendar window)."
         )
 
     header = (
-        f"Calendar events ({len(items)} found) from {time_min_s} to {time_max_s} "
-        f"(America/New_York):\n\n"
+        f"Calendar events ({len(all_items)} found) from {time_min_s} to {time_max_s} "
+        f"(America/New_York, calendars checked: {', '.join(CALENDAR_IDS_TO_CHECK)}):\n\n"
     )
-    return header + "\n\n".join(_event_line(ev) for ev in items)
+    return header + "\n\n".join(_event_line(ev, cal_id) for ev, cal_id in all_items)
 

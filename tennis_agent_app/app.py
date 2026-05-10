@@ -6,6 +6,8 @@ from agent import get_agent
 import time
 import logging
 
+model_endpoint = "ollama" ### <----------- CHANGE WHICH LLM ENDPOINT IS BEING USED FOR COST OPTIMIZATION [options - ollama, databricks, vertex]
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
@@ -35,7 +37,7 @@ def get_cached_agent(model: str):
     return get_agent(model)
 
 try:
-    agent = get_cached_agent(model="vertex")
+    agent = get_cached_agent(model=model_endpoint) 
 except Exception as e:
     st.error(f"Error creating agent: {e}")
     agent = None

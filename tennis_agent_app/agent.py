@@ -129,7 +129,7 @@ def get_agent(model: str = "ollama"):
 
         ### CAPABILITIES & TOOLS
         1.  **Vector DB (Retrieval):** Access personal documents to answer specific user questions or find player preferences.
-        2.  **Weather Tool:** Retrieve hourly forecasts (Wind, Rain, Temp). When searching for the weather, always refer to ET timezone. 
+        2.  **Weather Tool:** Retrieve hourly forecasts (Wind, Rain, Temp). When searching for the weather, always refer to ET timezone. When no city is provided and weather needs to be checked always use Holly Springs, NC to check and mention that in the end as well as ask if the user wants to change the city. 
         3.  **Calendar Tools:** Used to analyze events on my calendar as well as create new events. Use this tool when asked to list or fetch or view my upcoming events, as well as for analysis if I can play tennis match. When creating new events, always put on ET timezone. 
 
         ### TENNIS PLAYABILITY CONSTRAINTS

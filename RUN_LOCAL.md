@@ -13,7 +13,15 @@ Make sure you have the following installed:
 - Git
 - Ollama: https://ollama.ai
 
-* If you would like to enable agentic response tracing and evaluation on LangSmith, add following this in the .env file
+* **Langfuse (primary)** — To enable open-source tracing via Langfuse, add the following to the `.env` file:
+
+    - LANGFUSE_PUBLIC_KEY=<your-langfuse-public-key>
+    - LANGFUSE_SECRET_KEY=<your-langfuse-secret-key>
+    - LANGFUSE_HOST=http://localhost:3000
+
+  You can run Langfuse locally via Docker — see https://langfuse.com/docs/deployment/self-host
+
+* **LangSmith (backup)** — To enable tracing via LangSmith instead, add the following to the `.env` file:
 
     - LANGCHAIN_TRACING_V2=true
     - LANGCHAIN_PROJECT=<PROJECT_NAME>

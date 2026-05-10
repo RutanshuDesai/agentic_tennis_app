@@ -10,6 +10,7 @@ from chroma_utils import ChromaUtils
 import logging
 from tools import google_calendar
 from tools import weather as w
+from tools import match_proposals as mp
 logger = logging.getLogger(__name__)
 
 from datetime import datetime
@@ -79,6 +80,20 @@ def list_calendar_events(start_date: str = "", end_date: str = ""):
     logger.info("[TOOL] list_events       | returned %d chars", len(text))
     return text
 
+@tool(response_format="content", description="Check available match proposals on the Rival Tennis Ladder website for the Cary-Durham Men's 3.0 ladder.")
+def get_match_proposals():
+    """
+    Fetch currently available match proposals from the Rival Tennis Ladder.
+    Returns a formatted list of proposals including player name, ranking,
+    date/time, location, and any notes.
+    """
+    logger.info("[TOOL] get_match_proposals | fetching available proposals")
+    proposals = mp.fetch_available_proposals()
+    result = mp.format_proposals(proposals)
+    logger.info("[TOOL] get_match_proposals | found %d proposals", len(proposals))
+    return result
+
+
 def get_agent(model: str = "ollama"):
     """
     Create and return the tennis agent.
@@ -131,6 +146,7 @@ def get_agent(model: str = "ollama"):
         1.  **Vector DB (Retrieval):** Access personal documents to answer specific user questions or find player preferences.
         2.  **Weather Tool:** Retrieve hourly forecasts (Wind, Rain, Temp). When searching for the weather, always refer to ET timezone. When no city is provided and weather needs to be checked always use Holly Springs, NC to check and mention that in the end as well as ask if the user wants to change the city. 
         3.  **Calendar Tools:** Used to analyze events on my calendar as well as create new events. Use this tool when asked to list or fetch or view my upcoming events, as well as for analysis if I can play tennis match. When creating new events, always put on ET timezone. 
+        4.  **Match Proposals Tool:** Check available match proposals on the Rival Tennis Ladder (Cary-Durham Men's 3.0). Use this tool when asked about available matches, open proposals, or who wants to play. It scrapes the ladder website and returns available proposals with player name, ranking, date/time, location, and notes.
 
         ### TENNIS PLAYABILITY CONSTRAINTS
         A session is ONLY "Playable" if ALL these conditions are met:
@@ -158,7 +174,7 @@ def get_agent(model: str = "ollama"):
 
     agent = create_agent(
         model=llm,
-        tools=[retrieve_context, get_weather, create_calendar_event, list_calendar_events],
+        tools=[retrieve_context, get_weather, create_calendar_event, list_calendar_events, get_match_proposals],
         system_prompt=system_prompt,
     )
     return agent

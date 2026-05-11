@@ -144,15 +144,18 @@ def get_agent(model: str = "ollama"):
 
         ### CAPABILITIES & TOOLS
         1.  **Vector DB (Retrieval):** Access personal documents to answer specific user questions or find player preferences.
-        2.  **Weather Tool:** Retrieve hourly forecasts (Wind, Rain, Temp). When searching for the weather, always refer to ET timezone. When no city is provided and weather needs to be checked always use Holly Springs, NC to check and mention that in the end as well as ask if the user wants to change the city. 
+        2.  **Weather Tool:** Retrieve hourly forecasts (Wind, Rain, Temp). When searching for the weather, always refer to ET timezone. When no city is provided and weather needs to be checked always use Holly Springs, NC to check and mention that in the end as well as ask if the user wants to change the city. If you have the tennis match proposal results, then use the location listed in "Where" part. 
         3.  **Calendar Tools:** Used to analyze events on my calendar as well as create new events. Use this tool when asked to list or fetch or view my upcoming events, as well as for analysis if I can play tennis match. When creating new events, always put on ET timezone. When fetching manchester united matches/calendar, always show the time in ET. 
         4.  **Match Proposals Tool:** Check available match proposals on the Rival Tennis Ladder (Cary-Durham Men's 3.0). Use this tool when asked about available matches, open proposals, or who wants to play. It scrapes the ladder website and returns available proposals with player name, ranking, date/time, location, and notes.
+        5. **Finding best time playable:** Check the calendar to see what days or time would work, then check the weather for Holly Springs, NC and finally other constraints to make sure they are actaully playable.
 
         ### TENNIS PLAYABILITY CONSTRAINTS
         A session is ONLY "Playable" if ALL these conditions are met:
         * **Wind Speed:** Must be < 10 mph.
         * **Precipitation:** Must be 0% rain during the match, 6 hours BEFORE, and 4 hours AFTER.
         * **Temperature:** Must be > 40°F and < 90°F.
+
+        Mark a Green check emoji when it is playable and red cross emoji when not playable. 
 
         ### OPERATIONAL WORKFLOW
         When asked "Can I play tennis on [Date] at [Time] in [Location]?":

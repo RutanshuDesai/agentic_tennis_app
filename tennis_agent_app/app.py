@@ -6,7 +6,7 @@ from agent import get_agent
 import time
 import logging
 
-model_endpoint = "ollama" ### <----------- CHANGE WHICH LLM ENDPOINT IS BEING USED FOR COST OPTIMIZATION [options - ollama, databricks, vertex]
+model_endpoint = "vertex" ### <----------- CHANGE WHICH LLM ENDPOINT IS BEING USED FOR COST OPTIMIZATION [options - ollama, databricks, vertex]
 
 logging.basicConfig(
     level=logging.INFO,

@@ -102,7 +102,7 @@ def get_agent(model: str = "ollama"):
         model: LLM backend to use — "ollama", "databricks", or "vertex".
     """
     if model == "ollama":
-        llm = ChatOllama(model="gemma4:26b")
+        llm = ChatOllama(model=os.environ.get("OLLAMA_MODEL", "gemma4:26b"))
         logger.info("Using local Ollama LLM model!")
 
     elif model == "databricks":
@@ -115,7 +115,7 @@ def get_agent(model: str = "ollama"):
             raise ValueError("DATABRICKS_BASE_URL not found in environment variables.")
 
         llm = ChatOpenAI(
-            model="gemini-3-flash-preview",
+            model=os.environ.get("DATABRICKS_MODEL", "gemini-3-flash-preview"),
             api_key=DATABRICKS_TOKEN,
             base_url=DATABRICKS_BASE_URL,
         )
@@ -127,7 +127,7 @@ def get_agent(model: str = "ollama"):
             raise ValueError("VERTEX_API_KEY not found in environment variables.")
 
         llm = ChatGoogleGenerativeAI(
-            model="gemini-3.1-flash-lite-preview", # gemini-2.5-flash; gemini-3.1-flash-lite-preview ; gemini-3-flash-preview
+            model=os.environ.get("VERTEX_MODEL", "gemini-3.1-flash-lite-preview"),
             google_api_key=VERTEX_API_KEY,
             vertexai=True,
         )

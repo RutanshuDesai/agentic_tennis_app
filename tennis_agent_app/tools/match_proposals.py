@@ -1,11 +1,13 @@
 import logging
+import os
 from playwright.sync_api import sync_playwright
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_PROPOSALS_URL = (
-    "https://cary.tennis-ladder.com/season/2026/spring/mens-30/proposals"
-)
+DEFAULT_PROPOSALS_URL = os.environ.get("PROPOSALS_URL", "")
 
 
 def fetch_available_proposals(
@@ -13,7 +15,7 @@ def fetch_available_proposals(
     timeout_ms: int = 15_000,
 ) -> list[dict]:
     """
-    Scrape available match proposals from the Rival Tennis Ladder website.
+    Scrape available match proposals from the tennis tournament website.
 
     Opens the proposals page in a headless browser, clicks the "Available"
     filter, and extracts each proposal card's details.

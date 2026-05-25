@@ -3,10 +3,14 @@ from langchain_core.messages import HumanMessage, AIMessage
 from agent import get_agent
 #from langfuse.callback import CallbackHandler
 
+import os
 import time
 import logging
+from dotenv import load_dotenv
 
-model_endpoint = "vertex" ### <----------- CHANGE WHICH LLM ENDPOINT IS BEING USED FOR COST OPTIMIZATION [options - ollama, databricks, vertex]
+load_dotenv()
+
+model_endpoint = os.environ.get("MODEL_ENDPOINT", "ollama")
 
 logging.basicConfig(
     level=logging.INFO,

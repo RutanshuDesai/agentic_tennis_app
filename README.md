@@ -32,7 +32,7 @@ Select the backend by setting the `MODEL` option when launching the app. Hosted 
 
 Scheduling tennis matches—especially in ladder-style tournaments—is deceptively complex.
 
-The requirement of the Tennis ladder tournament is that you need to propose matches to players that they can accept, as well as you have the ability to accept the matches proposed by other players. Players with the most points at the end of the tournament qualify for knockout rounds. 
+The requirement of the tennis tournament is that you need to propose matches to players that they can accept, as well as you have the ability to accept the matches proposed by other players. Players with the most points at the end of the tournament qualify for knockout rounds. 
 
 To accept or propose a match, I need to:
 - Check my calendar availability

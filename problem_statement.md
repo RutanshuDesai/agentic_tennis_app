@@ -1,7 +1,7 @@
 * This project is an agentic AI assistant that helps me schedule my tennis matches and other fitness activities.
 The agent connects to my Google Calendar and a Weather API to determine whether I can play at a specified time and location.
 
-* This project starts with the requirement of the Tennis ladder tournament where you need to propose matches to players that they can accept, as well as you have the ability to accept the matches proposed by other players. Players with the most points at the end of the tournament qualify for knockout rounds. 
+* This project starts with the requirement of the tennis tournament where you need to propose matches to players that they can accept, as well as you have the ability to accept the matches proposed by other players. Players with the most points at the end of the tournament qualify for knockout rounds. 
 
 * To accept a match, I have to go thorugh my calendar to see my availability, check the weather as well as check my workout schedule [cant play after heavy workout day].
 

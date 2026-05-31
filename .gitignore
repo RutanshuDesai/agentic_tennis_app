@@ -13,3 +13,5 @@ key_learning.txt
 google_secret/
 tennis_agent_app/*.txt
 tennis_agent_app/vertex_api.py
+blog/
+IMPLEMENTATION_ROADMAP_MULTIAGENT.md

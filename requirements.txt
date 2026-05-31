@@ -20,5 +20,6 @@ langchain-google-genai==4.2.2
 google-api-python-client
 #google-auth-httplib2
 google-auth-oauthlib
+google-cloud-secret-manager
 #langgraph==1.0.2
 playwright==1.59.0

@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import os.path
 from typing import List, Optional
@@ -13,8 +14,14 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+RUNTIME_ENV = os.environ.get("RUNTIME_ENV", "local")
+
 CREDS_FILE = os.environ.get("GOOGLE_CALENDAR_CRED_FILE_PATH")
 TOKEN_FILE = os.environ.get("GOOGLE_CALENDAR_TOKEN_FILE_PATH")
+GCP_PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
+CREDS_SECRET_NAME = os.environ.get("GOOGLE_CALENDAR_CREDS_SECRET", "google-calendar-creds")
+TOKEN_SECRET_NAME = os.environ.get("GOOGLE_CALENDAR_TOKEN_SECRET", "google-calendar-token")
+
 CALENDAR_ID = os.environ.get("GOOGLE_CALENDAR_ID", "primary")
 CALENDAR_IDS_TO_CHECK = [
     cid.strip()
@@ -27,7 +34,30 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 CALENDAR_TZ = ZoneInfo("America/New_York")
 
 
+def _get_secret(secret_name: str) -> str:
+    """Fetch the latest version of a secret from GCP Secret Manager."""
+    from google.cloud import secretmanager
+
+    client = secretmanager.SecretManagerServiceClient()
+    name = f"projects/{GCP_PROJECT_ID}/secrets/{secret_name}/versions/latest"
+    response = client.access_secret_version(request={"name": name})
+    return response.payload.data.decode("UTF-8")
+
+
+def _update_secret(secret_name: str, payload: str) -> None:
+    """Add a new version of the secret (persists the refreshed token)."""
+    from google.cloud import secretmanager
+
+    client = secretmanager.SecretManagerServiceClient()
+    parent = f"projects/{GCP_PROJECT_ID}/secrets/{secret_name}"
+    client.add_secret_version(
+        request={"parent": parent, "payload": {"data": payload.encode("UTF-8")}}
+    )
+    logger.info("Updated secret %s with new token version.", secret_name)
+
+
 def _run_oauth_flow():
+    """Run interactive OAuth flow (local development only)."""
     flow = InstalledAppFlow.from_client_secrets_file(CREDS_FILE, SCOPES)
     creds = flow.run_local_server(port=8080)
     with open(TOKEN_FILE, 'w') as token:
@@ -36,6 +66,38 @@ def _run_oauth_flow():
 
 
 def _get_credentials():
+    if RUNTIME_ENV == "cloud":
+        return _get_credentials_from_secret_manager()
+    return _get_credentials_local()
+
+
+def _get_credentials_from_secret_manager():
+    """Load OAuth token from Secret Manager; refresh and persist if expired."""
+    token_json = _get_secret(TOKEN_SECRET_NAME)
+    creds = Credentials.from_authorized_user_info(json.loads(token_json), SCOPES)
+
+    if not creds.valid:
+        if creds.expired and creds.refresh_token:
+            try:
+                creds.refresh(Request())
+                _update_secret(TOKEN_SECRET_NAME, creds.to_json())
+            except RefreshError:
+                raise RuntimeError(
+                    "OAuth refresh token expired or revoked. "
+                    "Re-run the local OAuth flow to generate a new token, "
+                    "then upload it to Secret Manager."
+                )
+        else:
+            raise RuntimeError(
+                "No valid credentials in Secret Manager. "
+                "Run the OAuth flow locally and upload the token."
+            )
+
+    return creds
+
+
+def _get_credentials_local():
+    """Original local-file credential flow for development."""
     creds = None
     if os.path.exists(TOKEN_FILE):
         creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)

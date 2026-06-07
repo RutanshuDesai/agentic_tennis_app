@@ -9,8 +9,13 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-from dotenv import load_dotenv
-load_dotenv(os.path.expandvars(os.environ.get("DOTENV_PATH", ".env")))
+from dotenv import load_dotenv, find_dotenv
+
+dotenv_path = os.environ.get("DOTENV_PATH")
+if dotenv_path:
+    load_dotenv(os.path.expandvars(dotenv_path))
+else:
+    load_dotenv(find_dotenv(usecwd=True))
 
 logger = logging.getLogger(__name__)
 

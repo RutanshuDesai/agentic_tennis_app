@@ -1,5 +1,5 @@
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
 from langchain_chroma import Chroma
@@ -16,7 +16,11 @@ logger = logging.getLogger(__name__)
 from datetime import datetime
 todays_date = datetime.now().strftime("%Y-%m-%d")
 
-load_dotenv(os.environ.get("DOTENV_PATH", ".env"))
+dotenv_path = os.environ.get("DOTENV_PATH")
+if dotenv_path:
+    load_dotenv(dotenv_path)
+else:
+    load_dotenv(find_dotenv(usecwd=True))
 
 ## setting up vector store
 embeddings = OllamaEmbeddings(model="nomic-embed-text:latest")

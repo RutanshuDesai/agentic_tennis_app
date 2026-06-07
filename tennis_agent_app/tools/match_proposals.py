@@ -1,9 +1,13 @@
 import logging
 import os
 from playwright.sync_api import sync_playwright
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
-load_dotenv(os.environ.get("DOTENV_PATH", ".env"))
+dotenv_path = os.environ.get("DOTENV_PATH")
+if dotenv_path:
+    load_dotenv(dotenv_path)
+else:
+    load_dotenv(find_dotenv(usecwd=True))
 
 logger = logging.getLogger(__name__)
 

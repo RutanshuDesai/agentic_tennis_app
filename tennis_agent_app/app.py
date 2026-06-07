@@ -6,9 +6,14 @@ from agent import get_agent
 import os
 import time
 import logging
-from dotenv import load_dotenv
+from pathlib import Path
+from dotenv import load_dotenv, find_dotenv
 
-load_dotenv(os.environ.get("DOTENV_PATH", ".env"))
+dotenv_path = os.environ.get("DOTENV_PATH")
+if dotenv_path:
+    load_dotenv(dotenv_path)
+else:
+    load_dotenv(find_dotenv(usecwd=True))
 
 model_endpoint = os.environ.get("MODEL_ENDPOINT", "ollama")
 
@@ -27,12 +32,38 @@ logging.getLogger("google_auth_oauthlib.flow").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
+st.set_page_config(page_title="Agent Chat", page_icon="🤖")
+
+APP_PASSWORD = os.environ.get("APP_PASSWORD", "")
+
+
+def check_password() -> bool:
+    """Gate access behind a password prompt. Returns True if authenticated."""
+    if not APP_PASSWORD:
+        return True
+
+    if st.session_state.get("authenticated"):
+        return True
+
+    st.title("🔒 Login Required")
+    st.markdown("Enter the access password to use this app.")
+    password = st.text_input("Password", type="password", key="login_password")
+    if st.button("Login"):
+        if password == APP_PASSWORD:
+            st.session_state.authenticated = True
+            st.rerun()
+        else:
+            st.error("Incorrect password. Please try again.")
+    return False
+
+
+if not check_password():
+    st.stop()
+
 if "app_initialized" not in st.session_state:
     logger.info("Starting Tennis agentic application")
     st.session_state.app_initialized = True
 
-
-st.set_page_config(page_title="Agent Chat", page_icon="🤖")
 st.title("Personal AI Agent Assistant Chat")
 
 # Setup Agent

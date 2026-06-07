@@ -25,7 +25,7 @@ gcloud run deploy "$GCP_SERVICE_NAME" \
   --region "$GCP_REGION" \
   --platform managed \
   --allow-unauthenticated \
-  --memory 512Mi \
+  --memory 1Gi \
   --cpu 1 \
   --max-instances 1 \
   --port 8080 \

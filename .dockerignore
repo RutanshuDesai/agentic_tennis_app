@@ -1,0 +1,16 @@
+.env
+.env.*
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.pyo
+.DS_Store
+ReadMe.md
+README.md
+build.sh
+deploy.sh
+push_secrets.sh
+example.env
+google_secret/

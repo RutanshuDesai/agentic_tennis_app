@@ -16,8 +16,7 @@ logger = logging.getLogger(__name__)
 from datetime import datetime
 todays_date = datetime.now().strftime("%Y-%m-%d")
 
-# Load environment variables
-load_dotenv()
+load_dotenv(os.environ.get("DOTENV_PATH", ".env"))
 
 ## setting up vector store
 embeddings = OllamaEmbeddings(model="nomic-embed-text:latest")

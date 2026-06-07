@@ -21,5 +21,8 @@ google-api-python-client
 #google-auth-httplib2
 google-auth-oauthlib
 google-cloud-secret-manager
-#langgraph==1.0.2
+langgraph==1.0.2
+langgraph-prebuilt==1.0.8
+langgraph-checkpoint==3.0.1
+langgraph-sdk==0.2.15
 playwright==1.59.0

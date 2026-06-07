@@ -3,7 +3,7 @@ import os
 from playwright.sync_api import sync_playwright
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(os.environ.get("DOTENV_PATH", ".env"))
 
 logger = logging.getLogger(__name__)
 

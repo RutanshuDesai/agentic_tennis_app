@@ -199,9 +199,116 @@ This project emphasizes:
 
 It is intentionally scoped as a **personal system** to experiment with agentic patterns applicable to larger, real-world applications.
 
-## Running the App
+## Running the App Locally
 
 The app runs locally using Streamlit. The LLM backend is configurable — set it to `ollama`, `vertex`, or `databricks` in `app.py`.
 
 See [RUN_LOCAL.md](./RUN_LOCAL.md) for detailed setup and execution steps.
+
+---
+
+## Deploying to GCP Cloud Run
+
+### Prerequisites
+
+1. **Google Cloud SDK (gcloud CLI)**
+
+   Install from https://cloud.google.com/sdk/docs/install or via Homebrew:
+   ```bash
+   brew install google-cloud-sdk
+   ```
+
+2. **Authenticate with GCP**
+   ```bash
+   gcloud auth login
+   gcloud auth application-default login
+   ```
+
+3. **Enable required GCP APIs**
+   ```bash
+   gcloud services enable \
+     cloudbuild.googleapis.com \
+     run.googleapis.com \
+     artifactregistry.googleapis.com \
+     secretmanager.googleapis.com \
+     --project YOUR_PROJECT_ID
+   ```
+
+4. **Create an Artifact Registry repository** (one-time setup)
+   ```bash
+   gcloud artifacts repositories create agentic-image \
+     --repository-format=docker \
+     --location=us-east1 \
+     --project YOUR_PROJECT_ID
+   ```
+
+### Configuration
+
+Copy the example env file and fill in your GCP values:
+
+```bash
+cp example.env .env
+```
+
+Set these variables in your `.env`:
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `GCP_PROJECT_ID` | Your GCP project ID | `my-project-123456` |
+| `GCP_REGION` | GCP region for deployment | `us-east1` |
+| `GCP_SERVICE_NAME` | Cloud Run service name | `agentic-app` |
+| `GCP_AR_REPO` | Artifact Registry repository name | `agentic-image` |
+| `GCP_IMAGE_NAME` | Docker image name | `agentic_image` |
+
+### Secrets Management
+
+App secrets are stored in **GCP Secret Manager** — never baked into the Docker image or passed as plain-text CLI arguments.
+
+Three secrets are managed:
+
+| Secret Name | Contents |
+|-------------|----------|
+| `agentic_env` | Your full `.env` file (API keys, model config, etc.) |
+| `google-calendar-creds` | Google Calendar OAuth `credentials2.json` |
+| `google-calendar-token` | Google Calendar OAuth `token.json` |
+
+**Upload secrets** (run whenever your `.env` or Google Calendar files change):
+
+```bash
+./push_secrets.sh
+```
+
+This script reads file paths from your `.env` — no secrets are hardcoded, so it is safe to commit to a public repo.
+
+### Build and Deploy
+
+**Step 1: Build the container image**
+
+This uploads your local source to Cloud Build, builds the Docker image, and pushes it to Artifact Registry:
+
+```bash
+./build.sh
+```
+
+**Step 2: Deploy to Cloud Run**
+
+This deploys the built image and mounts secrets from Secret Manager automatically:
+
+```bash
+./deploy.sh
+```
+
+The deploy script:
+- Mounts `agentic_env` as `/secrets/.env` inside the container (loaded by `python-dotenv` via `DOTENV_PATH`)
+- Sets `RUNTIME_ENV=cloud` so the app fetches Google Calendar credentials from Secret Manager instead of local files
+- Sets `GCP_PROJECT_ID` for Secret Manager access
+
+### Viewing Logs
+
+```bash
+gcloud logging read \
+  "resource.type=cloud_run_revision AND resource.labels.service_name=agentic-app" \
+  --project YOUR_PROJECT_ID \
+  --limit 30
+```
 

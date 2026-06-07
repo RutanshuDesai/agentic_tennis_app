@@ -1,3 +1,4 @@
+import os
 from dotenv import load_dotenv
 import pandas as pd
 
@@ -9,9 +10,7 @@ from langchain_chroma import Chroma
 import logging
 logger = logging.getLogger(__name__)
 
-
-# Load environment variables
-load_dotenv()
+load_dotenv(os.environ.get("DOTENV_PATH", ".env"))
 
 class ChromaUtils:
     def __init__(self, collection_name: str, persist_db_directory: str, embeddings_model: str):

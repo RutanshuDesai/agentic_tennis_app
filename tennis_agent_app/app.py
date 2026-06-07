@@ -8,7 +8,7 @@ import time
 import logging
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(os.environ.get("DOTENV_PATH", ".env"))
 
 model_endpoint = os.environ.get("MODEL_ENDPOINT", "ollama")
 
